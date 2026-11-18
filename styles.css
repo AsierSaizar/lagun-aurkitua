@@ -74,6 +74,7 @@
   --fs-md: 16px;
   --fs-lg: 18px;
   --fs-xl: 22px;
+  --fs-2xl: 30px;
   --fs-display: 34px;
 
   /* Motion */
@@ -424,6 +425,7 @@ main { flex: 1; padding-top: var(--s-5); padding-bottom: var(--s-7); outline: no
 
 .text-btn {
   appearance: none;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
@@ -712,21 +714,26 @@ main { flex: 1; padding-top: var(--s-5); padding-bottom: var(--s-7); outline: no
 }
 
 /* ── Person detail ────────────────────────── */
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-1);
-  min-height: 40px;
-  margin: 0 0 var(--s-2) -6px; /* optical: aligns the chevron's stroke with the text edge */
+.profile { display: flex; align-items: center; gap: var(--s-4); margin-top: var(--s-6); }
+.profile-main { min-width: 0; }
+.profile-eyebrow {
   color: var(--text-2);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  text-decoration: none;
-  transition: color var(--dur-fast) var(--ease);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
-@media (hover: hover) {
-  .back-link:hover { color: var(--text); }
+.profile-name {
+  margin-top: var(--s-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 400;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
+.meta { margin-top: var(--s-1); color: var(--text-2); font-size: var(--fs-xs); }
+.profile-change { min-height: 32px; margin-top: var(--s-1); }
+.profile-change .icon { width: 16px; height: 16px; }
 
 .wish-list {
   border: 1px solid var(--border);
@@ -836,6 +843,54 @@ main { flex: 1; padding-top: var(--s-5); padding-bottom: var(--s-7); outline: no
 .toast .icon { width: 18px; height: 18px; color: var(--gold-light); }
 .toast.error .icon { color: #FFFFFF; }
 
+/* ── Modal (Olentzero) ────────────────────── */
+.modal {
+  width: min(440px, calc(100vw - 2 * var(--gutter)));
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+}
+.modal::backdrop { background: rgba(14, 23, 19, .55); }
+.modal[open] { animation: modal-in var(--dur) var(--ease); }
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+}
+
+.modal-hero {
+  min-height: 0;
+  display: grid;
+  place-items: center start;
+  padding: var(--s-6) var(--s-5);
+  border-radius: 0;
+}
+.modal-eye {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--panel-text);
+  color: var(--panel);
+  box-shadow: 0 0 0 4px rgba(230, 200, 135, .35);
+}
+.modal-eye .icon { width: 28px; height: 28px; }
+
+.modal-body { padding: var(--s-5); }
+.modal-title { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 400; line-height: 1.2; }
+.modal-text { margin-top: var(--s-2); color: var(--text-2); }
+
+.modal-actions { display: flex; flex-direction: column-reverse; gap: var(--s-2); margin-top: var(--s-5); }
+.modal-actions .btn { width: 100%; white-space: normal; text-align: center; }
+@media (min-width: 480px) {
+  .modal-actions { flex-direction: row; justify-content: flex-end; }
+  .modal-actions .btn { width: auto; }
+}
+
 /* ── Footer ───────────────────────────────── */
 .site-footer {
   padding: var(--s-5) 0 calc(var(--s-5) + env(safe-area-inset-bottom));
@@ -849,5 +904,6 @@ main { flex: 1; padding-top: var(--s-5); padding-bottom: var(--s-7); outline: no
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0ms !important; }
   .festive::before { animation: none; }
+  .modal[open] { animation: none; }
   .spinner { animation-duration: 1.6s; }
 }

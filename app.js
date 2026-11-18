@@ -57,11 +57,15 @@
       loadErrorLead: "Begiratu Interneteko konexioa eta saiatu berriro.",
       retry: "Saiatu berriro",
       loading: "Kargatzen…",
-      othersTitle: "Noren zerrenda ikusi nahi duzu?",
-      othersLead: "Aukeratu pertsona bat haren nahiak ikusteko.",
+      othersTitle: "Nori egiten diozu oparia?",
+      othersLead: "Aukeratu pertsona hori haren nahiak ikusteko. Gogoratu egingo dugu.",
+      changePerson: "Beste pertsona bat aukeratu",
+      olTitle: "Olentzero zuri begira dago",
+      olText: "Olentzerok dena ikusten du. Ez begiratu zuri ez dagozkizun zerrendak!",
+      olCancel: "Utzi",
+      olConfirm: "Oker nenbilen, barkatu Olentzero",
       statusReady: "Zerrenda eginda",
       statusEmpty: "Oraindik ezer ez",
-      back: "Atzera",
       listOf: "Nahien zerrenda",
       emptyTitle: "Oraindik ez du ezer idatzi",
       emptyLead: "Itzuli geroago, agian orduan zerbait egongo da.",
@@ -73,7 +77,7 @@
       vSizes: "Neurriak",
       vAvoid: "Mesedez, ez",
       vNotes: "Oharrak",
-      discard: "Gorde gabeko aldaketak galduko dira. Jarraitu?",
+      discardNote: "Gorde gabeko aldaketak galduko dira.",
       demo: "Proba modua: datuak nabigatzaile honetan bakarrik gordetzen dira. Konfiguratu Supabase config.js fitxategian.",
       noPeople: "Ez dago inor zerrendan",
       noPeopleLead: "Gehitu izenak config.js fitxategian.",
@@ -124,11 +128,15 @@
       loadErrorLead: "Revisa la conexión a Internet y vuelve a intentarlo.",
       retry: "Reintentar",
       loading: "Cargando…",
-      othersTitle: "¿De quién quieres ver la lista?",
-      othersLead: "Elige a una persona para ver sus deseos.",
+      othersTitle: "¿A quién le haces el regalo?",
+      othersLead: "Elígela para ver sus deseos. La recordaremos.",
+      changePerson: "Elegir a otra persona",
+      olTitle: "Olentzero te está vigilando",
+      olText: "Olentzero lo ve todo. ¡No mires las listas que no te tocan!",
+      olCancel: "Cancelar",
+      olConfirm: "Me había equivocado, lo siento Olentzero",
       statusReady: "Lista hecha",
       statusEmpty: "Todavía nada",
-      back: "Volver",
       listOf: "Lista de deseos",
       emptyTitle: "Todavía no ha escrito nada",
       emptyLead: "Vuelve más tarde, quizá ya haya algo.",
@@ -140,7 +148,7 @@
       vSizes: "Tallas",
       vAvoid: "Mejor no",
       vNotes: "Notas",
-      discard: "Se perderán los cambios sin guardar. ¿Continuar?",
+      discardNote: "Se perderán los cambios sin guardar.",
       demo: "Modo prueba: los datos solo se guardan en este navegador. Configura Supabase en config.js.",
       noPeople: "No hay nadie en la lista",
       noPeopleLead: "Añade los nombres en config.js.",
@@ -215,6 +223,7 @@
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
     alert: '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
     users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    eye: '<path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/>',
   };
   const icon = (name, cls) =>
     `<svg class="icon${cls ? " " + cls : ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
@@ -264,7 +273,7 @@
       try { localStorage.removeItem(k); } catch { /* ignore */ }
     },
   };
-  const KEY = { lang: "la.lang", me: "la.me", demo: "la.demo.lists" };
+  const KEY = { lang: "la.lang", me: "la.me", targets: "la.targets", demo: "la.demo.lists" };
 
   // ── State ───────────────────────────────────────────────
   const savedMe = LS.get(KEY.me, null);
@@ -272,6 +281,7 @@
     lang: LS.get(KEY.lang, "eu") === "es" ? "es" : "eu",
     me: savedMe && PEOPLE.includes(savedMe) ? savedMe : null,
     lists: {},
+    targets: LS.get(KEY.targets, {}) || {}, // { [me]: person whose list I look at }
     loadedOnce: false,
     loadError: false,
     draft: null,
@@ -447,9 +457,19 @@
     return out + esc(text.slice(last));
   }
 
+  // Many browsers ship no Basque locale data, so Basque dates are formatted by hand.
+  const EU_MONTHS = ["urtarrilaren", "otsailaren", "martxoaren", "apirilaren", "maiatzaren", "ekainaren",
+    "uztailaren", "abuztuaren", "irailaren", "urriaren", "azaroaren", "abenduaren"];
+
   function fmtDate(iso) {
+    const d = new Date(iso);
+    if (state.lang === "eu" && !isNaN(d)) {
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${EU_MONTHS[d.getMonth()]} ${d.getDate()}a, ${hh}:${mm}`;
+    }
     try {
-      return new Intl.DateTimeFormat(state.lang === "es" ? "es-ES" : "eu-ES", {
+      return new Intl.DateTimeFormat("es-ES", {
         day: "numeric",
         month: "long",
         hour: "2-digit",
@@ -476,11 +496,40 @@
     else location.hash = hash;
   }
 
+  // The person I'm getting a present for (remembered per "me", on this device).
+  function currentTarget() {
+    const t_ = state.me && state.targets[state.me];
+    return t_ && PEOPLE.includes(t_) && t_ !== state.me ? t_ : null;
+  }
+
+  function setTarget(name) {
+    state.targets = { ...state.targets, [state.me]: name };
+    LS.set(KEY.targets, state.targets);
+  }
+
+  function clearTarget() {
+    const { [state.me]: _gone, ...rest } = state.targets;
+    state.targets = rest;
+    LS.set(KEY.targets, state.targets);
+  }
+
+  const viewHash = (name) => "#/view/" + encodeURIComponent(name);
+
   function onRoute() {
     const r = route();
     if (!state.me && r.name !== "") return location.replace("#/");
     if (state.me && !["me", "others", "view"].includes(r.name)) return location.replace("#/me");
     if (r.name === "view" && (!PEOPLE.includes(r.arg) || r.arg === state.me)) return location.replace("#/others");
+
+    if (r.name === "view") {
+      const target = currentTarget();
+      if (!target) setTarget(r.arg);
+      else if (r.arg !== target) {
+        // Typed URL / back button towards someone else's list → Olentzero steps in.
+        location.replace(viewHash(target));
+        return openOlentzero({ kind: "target", name: r.arg });
+      }
+    }
 
     render();
     window.scrollTo(0, 0);
@@ -572,7 +621,7 @@
       })}
       <nav class="segmented tabs" aria-label="${esc(t("tabsLabel"))}">
         <a class="segment" href="#/me"${cur("me")}>${esc(t("tabMine"))}</a>
-        <a class="segment" href="#/others"${cur("others")}>${esc(t("tabOthers"))}</a>
+        <a class="segment" href="${currentTarget() ? viewHash(currentTarget()) : "#/others"}"${cur("others")}>${esc(t("tabOthers"))}</a>
       </nav>`;
   }
 
@@ -751,7 +800,7 @@
             const ok = hasContent(state.lists[p]);
             return `
             <li>
-              <a class="person-row" href="#/view/${encodeURIComponent(p)}">
+              <a class="person-row" href="${viewHash(p)}" data-view="${esc(p)}">
                 ${avatar(p)}
                 <span class="person-main">
                   <span class="person-name">${esc(p)}</span>
@@ -789,19 +838,21 @@
   }
 
   function viewPerson(name) {
-    const back = `<a class="back-link" href="#/others">${icon("chevronLeft")}${esc(t("back"))}</a>`;
-    if (!state.loadedOnce) return back + (state.loadError ? errorHtml() : loadingHtml());
+    const head = subHeader("others");
+    if (!state.loadedOnce) return head + (state.loadError ? errorHtml() : loadingHtml());
     const row = state.lists[name];
     const filled = hasContent(row);
 
-    const top = `
-      ${back}
-      ${festive({
-        eyebrow: t("listOf"),
-        title: name,
-        meta: filled && row.updated_at ? t("updated", { date: fmtDate(row.updated_at) }) : "",
-        avatarHtml: avatar(name, true),
-      })}`;
+    const top = `${head}
+      <header class="profile">
+        ${avatar(name, true)}
+        <div class="profile-main">
+          <p class="profile-eyebrow">${esc(t("listOf"))}</p>
+          <h2 class="profile-name">${esc(name)}</h2>
+          ${filled && row.updated_at ? `<p class="meta">${esc(t("updated", { date: fmtDate(row.updated_at) }))}</p>` : ""}
+          <button type="button" class="text-btn text-btn-accent profile-change" data-action="change-target">${icon("users")}${esc(t("changePerson"))}</button>
+        </div>
+      </header>`;
 
     if (!filled) return top + emptyState("gift", t("emptyTitle"), t("emptyLead"));
 
@@ -847,8 +898,8 @@
     go("#/me");
   }
 
+  // Runs after Olentzero's confirmation (the modal also warns about unsaved changes).
   function notMe() {
-    if (state.dirty && !window.confirm(t("discard"))) return;
     state.me = null;
     state.draft = null;
     state.dirty = false;
@@ -929,13 +980,86 @@
     }, isError ? 4000 : 2200);
   }
 
+  // ── Olentzero modal ─────────────────────────────────────
+  // What happens if the user apologises to Olentzero:
+  //   { kind: "target", name } → switch straight to that person's list
+  //   { kind: "change" }       → forget the current person and go back to the list
+  //   { kind: "not-me" }       → change user
+  let pendingAction = null;
+
+  function openOlentzero(action) {
+    pendingAction = action;
+    const note = action.kind === "not-me" && state.dirty ? ` ${t("discardNote")}` : "";
+    const d = $("#olentzero");
+    if (!d || typeof d.showModal !== "function") {
+      // Very old browsers: plain confirm.
+      if (window.confirm(`${t("olTitle")}\n\n${t("olText")}${note}`)) confirmOlentzero();
+      else pendingAction = null;
+      return;
+    }
+    d.innerHTML = `
+      <div class="festive modal-hero">
+        <span class="festive-ribbon" aria-hidden="true"></span>
+        ${BOW}
+        <span class="modal-eye" aria-hidden="true">${icon("eye")}</span>
+      </div>
+      <div class="modal-body">
+        <h2 class="modal-title" id="olentzero-title">${esc(t("olTitle"))}</h2>
+        <p class="modal-text">${esc(t("olText") + note)}</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-action="ol-cancel">${esc(t("olCancel"))}</button>
+          <button type="button" class="btn btn-primary" data-action="ol-confirm">${esc(t("olConfirm"))}</button>
+        </div>
+      </div>`;
+    if (!d.open) d.showModal();
+    const cancel = d.querySelector('[data-action="ol-cancel"]');
+    if (cancel) cancel.focus(); // safe default
+  }
+
+  function closeOlentzero() {
+    pendingAction = null;
+    const d = $("#olentzero");
+    if (d && d.open) d.close();
+  }
+
+  function confirmOlentzero() {
+    const action = pendingAction;
+    closeOlentzero();
+    if (!action || !state.me) return;
+    if (action.kind === "not-me") return notMe();
+    if (action.kind === "change") {
+      clearTarget();
+      return go("#/others");
+    }
+    if (action.kind === "target" && PEOPLE.includes(action.name) && action.name !== state.me) {
+      setTarget(action.name);
+      go(viewHash(action.name));
+    }
+  }
+
+  const olDialog = $("#olentzero");
+  if (olDialog) {
+    olDialog.addEventListener("cancel", () => { pendingAction = null; }); // Esc
+    olDialog.addEventListener("click", (e) => {
+      if (e.target === olDialog) closeOlentzero(); // click on the backdrop
+    });
+  }
+
   // ── Events ──────────────────────────────────────────────
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-lang],[data-pick],[data-toggle],[data-single],[data-action]");
+    const el = e.target.closest("[data-lang],[data-pick],[data-view],[data-toggle],[data-single],[data-action]");
     if (!el) return;
 
     if (el.dataset.lang) return setLang(el.dataset.lang);
     if (el.dataset.pick) return pick(el.dataset.pick);
+    if (el.dataset.view) {
+      const target = currentTarget();
+      if (target && el.dataset.view !== target) {
+        e.preventDefault();
+        openOlentzero({ kind: "target", name: el.dataset.view });
+      }
+      return; // otherwise let the link navigate
+    }
 
     if (el.dataset.toggle && state.draft) {
       const list = state.draft[el.dataset.toggle];
@@ -956,8 +1080,14 @@
     }
 
     switch (el.dataset.action) {
+      case "ol-cancel":
+        return closeOlentzero();
+      case "ol-confirm":
+        return confirmOlentzero();
       case "not-me":
-        return notMe();
+        return openOlentzero({ kind: "not-me" });
+      case "change-target":
+        return openOlentzero({ kind: "change" });
       case "save":
         return save();
       case "retry":
