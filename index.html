@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="eu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Saizar Familia - Lagun Aurkitua</title>
+  <meta name="description" content="Saizar familiaren lagun aurkitua: idatzi zure opari-zerrenda eta ikusi besteena." />
+  <meta name="theme-color" content="#FAF6EF" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0E1713" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23A8292B'/%3E%3Cg transform='translate(4 4)' fill='white'%3E%3Cpath d='M12 3l4.5 6h-2l3.5 4.5h-2.5L19 18H5l3.5-4.5H6L9.5 9h-2L12 3z'/%3E%3Crect x='11' y='18' width='2' height='3'/%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#/" aria-label="Saizar Familia – Lagun Aurkitua">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l4.5 6h-2l3.5 4.5h-2.5L19 18H5l3.5-4.5H6L9.5 9h-2L12 3z"/><rect x="11" y="18" width="2" height="3" rx=".5"/></svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Lagun Aurkitua</span>
+          <span class="brand-sub">Saizar Familia</span>
+        </span>
+      </a>
+      <div class="segmented lang" role="group" aria-label="Hizkuntza / Idioma">
+        <button type="button" class="segment" data-lang="eu">EU</button>
+        <button type="button" class="segment" data-lang="es">ES</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="banner" class="container"></div>
+  <main id="app" class="container" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <div class="container" id="footer"></div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
